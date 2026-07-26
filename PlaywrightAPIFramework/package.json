@@ -1,0 +1,23 @@
+{
+  "name": "playwright-api-framework",
+  "version": "1.0.0",
+  "description": "Reusable Playwright + TypeScript API automation framework with a custom grouped HTML report",
+  "scripts": {
+    "test": "playwright test",
+    "test:auth": "playwright test tests/Auth",
+    "test:product": "playwright test tests/Product",
+    "test:user": "playwright test tests/User",
+    "report:open": "start reports/CustomReport.html"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "@types/node": "^20.14.0",
+    "@types/nodemailer": "^8.0.1",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.5.0",
+    "nodemailer": "^9.0.3"
+  }
+}

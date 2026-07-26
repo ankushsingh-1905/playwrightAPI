@@ -1,0 +1,8 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+reports/CustomReport.html
+reports/.results/
+*.log
+.DS_Store
