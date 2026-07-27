@@ -48,4 +48,13 @@ export class FakerUtil {
     static email() {
         return faker.internet.email();
     }
+
+     static getRandomPrice(): number {
+        return Number(
+            faker.commerce.price({
+                min: 100,
+                max: 1000
+            })
+        );
+    }
 }

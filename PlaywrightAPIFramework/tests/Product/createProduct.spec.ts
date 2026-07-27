@@ -3,6 +3,7 @@ import { AuthHeader } from "../../headers/authHeader";
 import { JsonValidator } from "../../utils/JsonValidator";
 import { productSchema } from "../../schemas/productSchema";
 import { ReportManager } from "../../utils/ReportManager";
+import { FakerUtil } from "../../utils/FakerUtil";
 import { createProductPayload, createProductPayloadWith } from "../../payloads/createProduct";
 
 // Ensures a token exists even if this file runs on its own (e.g. `npm run test:product`)
@@ -13,6 +14,9 @@ test.beforeAll(async ({ request }) => {
         AuthHeader.setToken(login.responseBody.accessToken);
     }
 });
+
+
+// Add FakerUtil
 
 test("TC_PRODUCT_001 - Create Product (Happy Path) @smoke @regression", async ({ productApi }, testInfo) => {
 
@@ -129,13 +133,67 @@ test("TC_PRODUCT_002 - Verify Required Fields @smoke @regression", async ({ prod
 
 });
 
-test("TC_PRODUCT_003 - Verify Response Headers @regression", async ({ productApi }, testInfo) => {
+test("TC_PRODUCT_003 - Create Product using Faker Price @smoke @regression",
+async ({ productApi }, testInfo) => {
+
+    const payload = {
+        ...createProductPayload,
+        price: FakerUtil.getRandomPrice()
+    };
+
+    const result = await productApi.createProduct(payload);
+
+    let verdict: "PASS" | "FAIL" = "PASS";
+
+    try {
+
+        // Verify Status Code
+        expect(result.actualStatus).toBe(201);
+
+        // Verify Response
+        expect(result.responseBody.id).toBeDefined();
+        expect(result.responseBody.title).toBe(payload.title);
+        expect(result.responseBody.description).toBe(payload.description);
+        expect(result.responseBody.price).toBe(payload.price);
+        expect(result.responseBody.category).toBe(payload.category);
+
+    } catch (e) {
+
+        verdict = "FAIL";
+        throw e;
+
+    } finally {
+
+        ReportManager.addResult({
+
+            module: ReportManager.getModuleName(testInfo),
+            testCaseId: "TC_PRODUCT_003 - Create Product using Faker Price",
+            description: "Verify Product Creation using Faker generated Price",
+            result: verdict,
+
+            apiResult: {
+                method: result.method,
+                url: result.endpoint,
+                curl: result.curl,
+                requestBody: result.requestBody,
+                responseBody: result.responseBody,
+                expectedStatus: 201,
+                actualStatus: result.actualStatus,
+                responseTime: result.responseTime
+            }
+
+        });
+
+    }
+
+});
+
+test("TC_PRODUCT_004 - Verify Response Headers @regression", async ({ productApi }, testInfo) => {
 
     const result = await productApi.createProduct(createProductPayload);
 
     expect(result.actualStatus).toBe(201);
 
-   
     
     let verdict: "PASS" | "FAIL" = "PASS";
 
@@ -159,7 +217,7 @@ test("TC_PRODUCT_003 - Verify Response Headers @regression", async ({ productApi
 
         ReportManager.addResult({
             module: ReportManager.getModuleName(testInfo),
-            testCaseId: "TC_PRODUCT_003 - Verify Response Headers",
+            testCaseId: "TC_PRODUCT_004 - Verify Response Headers",
             description: "Verify Response Headers",
             result: verdict,
             apiResult: {
@@ -179,7 +237,7 @@ test("TC_PRODUCT_003 - Verify Response Headers @regression", async ({ productApi
 });
 
 
-test("TC_PRODUCT_004 - Verify Business Rules @regression", async ({ productApi }, testInfo) => {
+test("TC_PRODUCT_005 - Verify Business Rules @regression", async ({ productApi }, testInfo) => {
 
     const result = await productApi.createProduct(createProductPayload);
 
@@ -210,7 +268,7 @@ test("TC_PRODUCT_004 - Verify Business Rules @regression", async ({ productApi }
 
         ReportManager.addResult({
             module: ReportManager.getModuleName(testInfo),
-            testCaseId: "TC_PRODUCT_004 - Verify Business Rules",
+            testCaseId: "TC_PRODUCT_005 - Verify Business Rules",
             description: "Verify Business Rules",
             result: verdict,
             apiResult: {
@@ -230,7 +288,7 @@ test("TC_PRODUCT_004 - Verify Business Rules @regression", async ({ productApi }
 });
 
 
-test("TC_PRODUCT_005 - Verify Null Values @regression", async ({ productApi }, testInfo) => {
+test("TC_PRODUCT_006 - Verify Null Values @regression", async ({ productApi }, testInfo) => {
 
     const payload = createProductPayloadWith({
 
@@ -261,7 +319,7 @@ test("TC_PRODUCT_005 - Verify Null Values @regression", async ({ productApi }, t
 
         ReportManager.addResult({
             module: ReportManager.getModuleName(testInfo),
-            testCaseId: "TC_PRODUCT_005 - Verify Null Values",
+            testCaseId: "TC_PRODUCT_006 - Verify Null Values",
             description: "Verify Null Values",
             result: verdict,
             apiResult: {
@@ -282,7 +340,7 @@ test("TC_PRODUCT_005 - Verify Null Values @regression", async ({ productApi }, t
 
 
 //Negative
-test("TC_PRODUCT_006 - Invalid Endpoint @regression", async ({ productApi }, testInfo) => {
+test("TC_PRODUCT_007 - Invalid Endpoint @regression", async ({ productApi }, testInfo) => {
 
     const result = await productApi.invalidEndpoint();
 
@@ -306,7 +364,7 @@ test("TC_PRODUCT_006 - Invalid Endpoint @regression", async ({ productApi }, tes
 
         ReportManager.addResult({
             module: ReportManager.getModuleName(testInfo),
-            testCaseId: "TC_PRODUCT_006 - Invalid Endpoint",
+            testCaseId: "TC_PRODUCT_007 - Invalid Endpoint",
             description: "Verify Invalid Endpoint",
             result: verdict,
             apiResult: {
@@ -326,7 +384,7 @@ test("TC_PRODUCT_006 - Invalid Endpoint @regression", async ({ productApi }, tes
 });
 
 
-test("TC_PRODUCT_007 - Verify Invalid Response Schema & Verify Invalid Data Types @regression", async ({ productApi }, testInfo) => {
+test("TC_PRODUCT_008 - Verify Invalid Response Schema & Verify Invalid Data Types @regression", async ({ productApi }, testInfo) => {
 
     const result = await productApi.createProduct(createProductPayload);
 
@@ -359,7 +417,7 @@ try {
 
         ReportManager.addResult({
             module: ReportManager.getModuleName(testInfo),
-            testCaseId: "TC_PRODUCT_007 - Verify Invalid Response Schema & Verify Invalid Data Types ",
+            testCaseId: "TC_PRODUCT_008 - Verify Invalid Response Schema & Verify Invalid Data Types ",
             description: "Verify Invalid Response Schema and Data Types",
             result: verdict,
             apiResult: {
@@ -379,7 +437,7 @@ try {
 });
 
 
-test("TC_PRODUCT_008 - Verify Missing Required Response Field @regression", async ({ productApi}, testInfo ) => {
+test("TC_PRODUCT_009 - Verify Missing Required Response Field @regression", async ({ productApi}, testInfo ) => {
 
     const result = await productApi.createProduct(createProductPayload);
 
@@ -409,7 +467,7 @@ try {
 
         ReportManager.addResult({
             module: ReportManager.getModuleName(testInfo),
-            testCaseId: "TC_PRODUCT_008 - Verify Missing Required Response Field",
+            testCaseId: "TC_PRODUCT_009 - Verify Missing Required Response Field",
             description: "Verify Missing Required Response Field",
             result: verdict,
             apiResult: {
@@ -429,7 +487,7 @@ try {
 });
 
 
-test("TC_PRODUCT_009 - Verify Incorrect Response Header @regression", async ({ productApi }, testInfo) => {
+test("TC_PRODUCT_010 - Verify Incorrect Response Header @regression", async ({ productApi }, testInfo) => {
 
     const result = await productApi.createProduct(createProductPayload);
 
@@ -457,7 +515,7 @@ try {
 
         ReportManager.addResult({
             module: ReportManager.getModuleName(testInfo),
-            testCaseId: "TC_PRODUCT_009 - Verify Incorrect Response Header",
+            testCaseId: "TC_PRODUCT_010 - Verify Incorrect Response Header",
             description: "Verify Incorrect Response Header",
             result: verdict,
             apiResult: {
