@@ -2,13 +2,15 @@
   "name": "playwright-api-framework",
   "version": "1.0.0",
   "description": "Reusable Playwright + TypeScript API automation framework with a custom grouped HTML report",
-  "scripts": {
-    "test": "playwright test",
-    "test:auth": "playwright test tests/Auth",
-    "test:product": "playwright test tests/Product",
-    "test:user": "playwright test tests/User",
-    "report:open": "start reports/CustomReport.html"
-  },
+ "scripts": {
+  "test": "playwright test",
+  "smoke": "playwright test --grep @smoke",
+  "regression": "playwright test --grep @regression",
+  "product": "playwright test tests/Product",
+  "auth": "playwright test tests/Auth",
+  "user": "playwright test tests/User",
+  "report:open": "start reports/CustomReport.html"
+},
   "devDependencies": {
     "@playwright/test": "^1.47.0",
     "@types/node": "^20.14.0",
