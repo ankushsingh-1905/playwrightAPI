@@ -293,6 +293,61 @@ function copyBlock(event, id) {
 </html>
 `;
 
-        FileUtil.writeFile(outputPath, html);
+      FileUtil.writeFile(outputPath, html);
     }
+
+    /**
+     * Returns the execution summary.
+     *
+     * Used by:
+     * MailService.ts
+     *
+     * Why?
+     * Instead of reading the HTML report,
+     * MailService directly asks ReportManager
+     * for the execution statistics.
+     */
+    static getExecutionSummary() {
+
+        // Load all saved test results
+        const results = this.loadAllResults();
+
+        // Total executed test cases
+        const total = results.length;
+
+        // Count passed test cases
+        const passed = results.filter(r => r.result === "PASS").length;
+
+        // Count failed test cases
+        const failed = total - passed;
+
+        // Calculate pass percentage
+        const passPercentage =
+            total === 0
+                ? "0.00"
+                : ((passed / total) * 100).toFixed(2);
+
+        // Calculate fail percentage
+        const failPercentage =
+            total === 0
+                ? "0.00"
+                : ((failed / total) * 100).toFixed(2);
+
+        // Return all summary values
+        return {
+
+            total,
+
+            passed,
+
+            failed,
+
+            passPercentage,
+
+            failPercentage
+
+        };
+
+    }
+
 }

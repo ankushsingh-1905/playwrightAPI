@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
-import fs from "fs";
 import path from "path";
 import { ENV } from "../config/env";
+import { ReportManager } from "./ReportManager";
 
 /**
  * MailService
@@ -66,28 +66,134 @@ export class MailService {
         );
 
         /**
-         * Step 3
-         * Create the email body.
-         *
-         * This is the message that appears
-         * inside the email.
-         */
-        const htmlBody = `
-
-            <h2>Playwright API Automation Execution</h2>
-
-            <p>
-            Execution completed successfully.
-            </p>
-
-            <p>
-            Please find the attached automation report.
-            </p>
-
-        `;
+ * Step 3
+ * Get execution summary.
+ *
+ * ReportManager calculates:
+ * - Total Tests
+ * - Passed
+ * - Failed
+ * - Pass %
+ * - Fail %
+ *
+ * MailService only reads these values
+ * and shows them in the email.
+ */
+const summary = ReportManager.getExecutionSummary();
 
         /**
          * Step 4
+         * Get Current Date & Time (IST)
+         */
+        const now = new Date();
+
+        const executionDate = now.toLocaleDateString("en-IN", {
+
+            day: "2-digit",
+
+            month: "short",
+
+            year: "numeric",
+
+            timeZone: "Asia/Kolkata"
+
+        });
+
+        const executionTime = now.toLocaleTimeString("en-IN", {
+
+            hour: "2-digit",
+
+            minute: "2-digit",
+
+            second: "2-digit",
+
+            hour12: true,
+
+            timeZone: "Asia/Kolkata"
+
+        });
+
+        /**
+ * Step 5
+ * Create the email body.
+ *
+ * This summary is shown inside
+ * the email before the report attachment.
+ */
+const htmlBody = `
+
+<h2>🚀 Playwright API Automation Execution Report</h2>
+
+<p>Hello Team,</p>
+
+<p>
+The Playwright API Automation execution has completed successfully.
+</p>
+
+<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse; font-family:Segoe UI;">
+
+<tr>
+<th align="left">Framework</th>
+<td>Playwright API Automation Framework</td>
+</tr>
+
+<tr>
+<th align="left">Execution Date</th>
+<td>${executionDate}</td>
+</tr>
+
+<tr>
+<th align="left">Execution Time (IST)</th>
+<td>${executionTime}</td>
+</tr>
+
+<tr>
+<th align="left">Total Test Cases</th>
+<td><b>${summary.total}</b></td>
+</tr>
+
+<tr>
+<th align="left">Passed</th>
+<td style="color:green;">
+<b>${summary.passed} (${summary.passPercentage}%)</b>
+</td>
+</tr>
+
+<tr>
+<th align="left">Failed</th>
+<td style="color:red;">
+<b>${summary.failed} (${summary.failPercentage}%)</b>
+</td>
+</tr>
+
+<tr>
+<th align="left">Execution Status</th>
+<td style="color:green;">
+<b>Completed Successfully</b>
+</td>
+</tr>
+
+</table>
+
+<br>
+
+<p>
+Please find the attached <b>HTML Automation Report</b> for detailed execution results.
+</p>
+
+<p>
+Thank you.
+</p>
+
+<br>
+
+Regards,<br>
+<b>Playwright API Automation Framework</b>
+
+`;
+
+        /**
+         * Step 6
          * Send the email.
          *
          * Includes:
@@ -113,9 +219,11 @@ export class MailService {
             attachments: [
 
                 {
+
                     filename: "CustomReport.html",
 
                     path: reportPath
+
                 }
 
             ]
@@ -123,7 +231,7 @@ export class MailService {
         });
 
         /**
-         * Step 5
+         * Step 7
          * Print success message.
          */
         console.log("Email Sent Successfully.");
