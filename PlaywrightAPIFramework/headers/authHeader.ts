@@ -1,55 +1,118 @@
 /**
- * Holds the access token for the current test run and builds the
- * Authorization header from it. Call AuthHeader.setToken() right after
- * a successful login (see tests/Auth/login.spec.ts), then every other
- * API class can call AuthHeader.build() to get an auth-ready header.
+ * AuthHeader is responsible for storing and providing
+ * the Bearer Token for authenticated APIs.
  *
- * AuthHeader.buildPasted() is a separate, independent path — it always
- * uses PASTED_TOKEN below, regardless of whether setToken() was ever
- * called. Use it when you want to force a specific token manually
- * (e.g. testing a single endpoint without running login first, or
- * testing with an expired/foreign token).
+ * Flow:
+ * Login API
+ *      ↓
+ * setToken()
+ *      ↓
+ * ProductAPI / UserAPI
+ *      ↓
+ * build()
+ *      ↓
+ * Authorization: Bearer <token>
  */
+
+// Stores the token for the current test execution.
 let currentToken: string | null = null;
 
-// 👇 Paste a token here when you want to force it via buildPasted()
+// Optional:
+// Paste a token here if you want to skip login
+// and use a fixed token manually.
 const PASTED_TOKEN = "";
 
 export const AuthHeader = {
+
+    /**
+     * Save the token after successful login.
+     *
+     * Called from Login Test.
+     */
     setToken(token: string) {
         currentToken = token;
     },
 
+    /**
+     * Returns the currently stored token.
+     *
+     * Useful when another class needs the token.
+     */
     getToken(): string | null {
         return currentToken;
     },
 
+    /**
+     * Removes the stored token.
+     *
+     * Useful after execution or before starting
+     * another test run.
+     */
     clear() {
         currentToken = null;
     },
 
-    //==========================
-    // Normal flow — token from a real login()
-    //==========================
+    //==================================================
+    // Normal Flow
+    //==================================================
+
+    /**
+     * Builds Authorization Header
+     * using the token received from Login API.
+     *
+     * Example:
+     * Authorization: Bearer eyJhbGc...
+     */
     build(): Record<string, string> {
+
+        // Prevent authenticated API execution
+        // if Login was not performed.
         if (!currentToken) {
+
             throw new Error(
-                "AuthHeader: no token set. Call AuthHeader.setToken() after a successful login before calling an authenticated endpoint."
+                "AuthHeader: No token available. Please login first."
             );
+
         }
-        return { Authorization: `Bearer ${currentToken}` };
+
+        return {
+
+            Authorization: `Bearer ${currentToken}`
+
+        };
+
     },
 
-    //==========================
-    // Manual flow — always uses PASTED_TOKEN above
-    //==========================
+    //==================================================
+    // Manual Flow
+    //==================================================
+
+    /**
+     * Uses a manually pasted token.
+     *
+     * Useful for:
+     * - Testing without Login
+     * - Expired Token Testing
+     * - Invalid Token Testing
+     */
     buildPasted(): Record<string, string> {
+
         const token = PASTED_TOKEN.trim();
+
         if (!token) {
+
             throw new Error(
-                "AuthHeader: PASTED_TOKEN is empty. Paste a token into headers/authHeader.ts before calling buildPasted()."
+                "AuthHeader: PASTED_TOKEN is empty."
             );
+
         }
-        return { Authorization: `Bearer ${token}` };
+
+        return {
+
+            Authorization: `Bearer ${token}`
+
+        };
+
     },
+
 };

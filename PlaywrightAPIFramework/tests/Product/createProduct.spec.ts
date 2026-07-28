@@ -533,3 +533,86 @@ try {
     }
 
 });
+
+const payloads = [
+    {
+        ...createProductPayload,
+        title: "iPhone 17",
+        price: FakerUtil.getRandomPrice()
+    },
+    {
+        ...createProductPayload,
+        title: FakerUtil.getThreeWordProductName(),
+        price: 1200
+    },
+    {
+        ...createProductPayload,
+        title: "Google Pixel 11",
+        price: 900
+    }
+];
+
+payloads.forEach((payload, index) => {
+
+    test(
+        `TC_PRODUCT_011_${index + 1} - Create Product using Data Driven Testing @smoke @regression`,
+        async ({ productApi }, testInfo) => {
+
+            const result = await productApi.createProduct(payload);
+
+            let verdict: "PASS" | "FAIL" = "PASS";
+
+            try {
+
+                expect(result.actualStatus).toBe(201);
+
+                expect(result.responseBody.id).toBeDefined();
+                expect(result.responseBody.title).toBe(payload.title);
+                expect(result.responseBody.price).toBe(payload.price);
+                expect(result.responseBody.description).toBe(payload.description);
+                expect(result.responseBody.category).toBe(payload.category);
+
+            } catch (e) {
+
+                verdict = "FAIL";
+                throw e;
+
+            } finally {
+
+                ReportManager.addResult({
+
+                    module: ReportManager.getModuleName(testInfo),
+
+                    testCaseId: `TC_PRODUCT_011_${index + 1}`,
+
+                    description: `Create Product using ${payload.title}`,
+
+                    result: verdict,
+
+                    apiResult: {
+
+                        method: result.method,
+                        url: result.endpoint,
+                        curl: result.curl,
+
+                        requestBody: result.requestBody,
+
+                        responseBody: result.responseBody,
+
+                        expectedStatus: 201,
+
+                        actualStatus: result.actualStatus,
+
+                        responseTime: result.responseTime
+
+                    }
+
+                });
+
+            }
+
+        }
+
+    );
+
+});
