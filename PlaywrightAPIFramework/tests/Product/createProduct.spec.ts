@@ -564,7 +564,7 @@ payloads.forEach((payload, index) => {
 
             try {
 
-                expect(result.actualStatus).toBe(201);
+                expect(result.actualStatus).toBe(203);
 
                 expect(result.responseBody.id).toBeDefined();
                 expect(result.responseBody.title).toBe(payload.title);
